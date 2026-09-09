@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.opengoofy.index12306</groupId>
-		<artifactId>index12306-all</artifactId>
+		<artifactId>12306</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 
