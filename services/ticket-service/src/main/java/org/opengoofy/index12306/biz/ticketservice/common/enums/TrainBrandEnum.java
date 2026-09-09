@@ -39,7 +39,7 @@ public enum TrainBrandEnum {
 
     Z_DIRECT_EXPRESS("2", "Z-直达"),
 
-    T_EXPRESS("3", "Z-直达"),
+    T_EXPRESS("3", "T-直达"),
 
     K_FAST("4", "K-快速"),
 
