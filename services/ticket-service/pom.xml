@@ -125,6 +125,12 @@
             <artifactId>spring-cloud-starter-alibaba-sentinel</artifactId>
         </dependency>
 
+        <!-- 二次开发：Sentinel 规则 Nacos 持久化数据源（版本由 spring-cloud-alibaba-dependencies 管理） -->
+        <dependency>
+            <groupId>com.alibaba.csp</groupId>
+            <artifactId>sentinel-datasource-nacos</artifactId>
+        </dependency>
+
         <!-- NoClassDefFoundError: javax/xml/bind/JAXBException start -->
         <dependency>
             <groupId>javax.xml.bind</groupId>

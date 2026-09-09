@@ -1,6 +1,8 @@
 server:
   port: 9005
-
+feign:
+  sentinel:
+    enabled: true
 spring:
   application:
     name: index12306-aggregation${unique-name:}-service
@@ -24,8 +26,27 @@ spring:
       password: nacos
     sentinel:
       transport:
-        dashboard: localhost:8686
+        dashboard: 127.0.0.1:8686
         port: 8719
+      datasource:
+        flow-rules:
+          nacos:
+            server-addr: ${spring.cloud.nacos.discovery.server-addr}
+            data-id: index12306-ticket-service-flow-rules
+            group-id: SENTINEL_GROUP
+            data-type: json
+            rule-type: flow
+            username: nacos
+            password: nacos
+        degrade-rules:
+          nacos:
+            server-addr: ${spring.cloud.nacos.discovery.server-addr}
+            data-id: index12306-ticket-service-degrade-rules
+            group-id: SENTINEL_GROUP
+            data-type: json
+            rule-type: degrade
+            username: nacos
+            password: nacos
   dynamic:
     thread-pool:
       nacos:

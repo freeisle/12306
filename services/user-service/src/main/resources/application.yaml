@@ -21,8 +21,27 @@ spring:
       username: nacos
     sentinel:
       transport:
-        dashboard: localhost:8686
+        dashboard: 127.0.0.1:8686
         port: 8719
+      datasource:
+        flow-rules:
+          nacos:
+            server-addr: ${spring.cloud.nacos.discovery.server-addr}
+            data-id: ${spring.application.name}-flow-rules
+            group-id: SENTINEL_GROUP
+            data-type: json
+            rule-type: flow
+            username: nacos
+            password: nacos
+        degrade-rules:
+          nacos:
+            server-addr: ${spring.cloud.nacos.discovery.server-addr}
+            data-id: ${spring.application.name}-degrade-rules
+            group-id: SENTINEL_GROUP
+            data-type: json
+            rule-type: degrade
+            username: nacos
+            password: nacos
 mybatis-plus:
   global-config:
     db-config:

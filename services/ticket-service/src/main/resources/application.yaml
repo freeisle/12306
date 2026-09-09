@@ -1,7 +1,5 @@
-
 server:
   port: 9002
-
 spring:
   application:
     name: index12306-ticket${unique-name:}-service
@@ -33,8 +31,36 @@ spring:
       password: nacos
     sentinel:
       transport:
-        dashboard: localhost:8686
+        dashboard: 127.0.0.1:8686
         port: 8719
+      datasource:
+        flow-rules:
+          nacos:
+            server-addr: ${spring.cloud.nacos.discovery.server-addr}
+            data-id: ${spring.application.name}-flow-rules
+            group-id: SENTINEL_GROUP
+            data-type: json
+            rule-type: flow
+            username: nacos
+            password: nacos
+        degrade-rules:
+          nacos:
+            server-addr: ${spring.cloud.nacos.discovery.server-addr}
+            data-id: ${spring.application.name}-degrade-rules
+            group-id: SENTINEL_GROUP
+            data-type: json
+            rule-type: degrade
+            username: nacos
+            password: nacos
+        system-rules:
+          nacos:
+            server-addr: ${spring.cloud.nacos.discovery.server-addr}
+            data-id: ${spring.application.name}-system-rules
+            group-id: SENTINEL_GROUP
+            data-type: json
+            rule-type: system
+            username: nacos
+            password: nacos
   dynamic:
     thread-pool:
       nacos:
@@ -78,6 +104,8 @@ framework:
       value-time-unit: days
 
 feign:
+  sentinel:
+    enabled: true
   client:
     config:
       default:
