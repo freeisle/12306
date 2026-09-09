@@ -68,6 +68,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -295,6 +296,10 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public PageResponse<TicketOrderDetailSelfRespDTO> pageSelfTicketOrder(TicketOrderSelfPageQueryReqDTO requestParam) {
         Result<UserQueryActualRespDTO> userActualResp = userRemoteService.queryActualUserByUsername(UserContext.getUsername());
+        // 失败关闭：远程调用失败（含熔断降级返回的失败 Result）时 data 为 null，直接取用会 NPE，必须拒绝本次查询
+        if (userActualResp == null || !userActualResp.isSuccess() || userActualResp.getData() == null) {
+            throw new ServiceException("用户服务查询失败，请稍后重试");
+        }
         LambdaQueryWrapper<OrderItemPassengerDO> queryWrapper = Wrappers.lambdaQuery(OrderItemPassengerDO.class)
                 .eq(OrderItemPassengerDO::getIdCard, userActualResp.getData().getIdCard())
                 .orderByDesc(OrderItemPassengerDO::getCreateTime);
@@ -311,6 +316,44 @@ public class OrderServiceImpl implements OrderService {
             BeanUtil.convertIgnoreNullAndBlank(orderItemDO, actualResult);
             return actualResult;
         });
+    }
+
+    @Override
+    public List<String> listActiveOrderIdCards(String trainId, List<String> idCards) {
+        // 入参兜底：车次或证件号集合为空时无需查询，直接返回空集合
+        if (trainId == null || trainId.isBlank() || idCards == null || idCards.isEmpty()) {
+            return Collections.emptyList();
+        }
+        // 注意：t_order_item 是 ShardingSphere 分片表（分片键为 user_id、order_sn），
+        // 若查询条件不带分片键会全广播路由，命中不存在的物理表（如 ds_0 中并无 t_order_item_16）而抛 SQL 异常，
+        // 因此采用两段式「精确路由」查询：
+        // 1）t_order_item_passenger 以 id_card 为分片键，按证件号精确路由取出关联的订单号；
+        LambdaQueryWrapper<OrderItemPassengerDO> relationWrapper = Wrappers.lambdaQuery(OrderItemPassengerDO.class)
+                .in(OrderItemPassengerDO::getIdCard, idCards)
+                .select(OrderItemPassengerDO::getOrderSn);
+        List<String> orderSnList = orderPassengerRelationService.list(relationWrapper).stream()
+                .map(OrderItemPassengerDO::getOrderSn)
+                .distinct()
+                .toList();
+        if (orderSnList.isEmpty()) {
+            return Collections.emptyList();
+        }
+        // 2）再携带分片键 order_sn 精确路由查询订单明细，过滤车次与「已取消 / 已退票 / 已改签」状态
+        // t_order_item.train_id 为 Long 型，入参 trainId 为字符串，此处转换
+        LambdaQueryWrapper<OrderItemDO> queryWrapper = Wrappers.lambdaQuery(OrderItemDO.class)
+                .in(OrderItemDO::getOrderSn, orderSnList)
+                .eq(OrderItemDO::getTrainId, Long.parseLong(trainId))
+                .notIn(OrderItemDO::getStatus, ListUtil.of(
+                        OrderItemStatusEnum.CLOSED.getStatus(),
+                        OrderItemStatusEnum.REFUNDED.getStatus(),
+                        OrderItemStatusEnum.RESCHEDULED.getStatus()))
+                .select(OrderItemDO::getIdCard);
+        List<OrderItemDO> orderItemDOList = orderItemMapper.selectList(queryWrapper);
+        // 同一证件号可能命中多条明细，去重后返回
+        return orderItemDOList.stream()
+                .map(OrderItemDO::getIdCard)
+                .distinct()
+                .toList();
     }
 
     private List<Integer> buildOrderStatusList(TicketOrderPageQueryReqDTO requestParam) {

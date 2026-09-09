@@ -105,4 +105,15 @@ public class TicketOrderController {
     public Result<Boolean> cancelTickOrder(@RequestBody CancelTicketOrderReqDTO requestParam) {
         return Results.success(orderService.cancelTickOrder(requestParam));
     }
+
+    /**
+     * 查询指定车次下已存在有效订单（未取消 / 未退票 / 未改签）的乘车人证件号集合
+     * <p>
+     * 供购票服务在下单前做「同一乘车人重复预订同一车次」校验使用。
+     */
+    @GetMapping("/api/order-service/order/ticket/active/id-cards")
+    public Result<List<String>> listActiveOrderIdCards(@RequestParam("trainId") String trainId,
+                                                       @RequestParam("idCards") List<String> idCards) {
+        return Results.success(orderService.listActiveOrderIdCards(trainId, idCards));
+    }
 }

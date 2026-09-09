@@ -35,7 +35,8 @@ import java.util.List;
  * 车票订单远程服务调用
  * 公众号：马丁玩编程，回复：加群，添加马哥微信（备注：12306）获取项目资料
  */
-@FeignClient(value = "index12306-order${unique-name:}-service", url = "${aggregation.remote-url:}")
+@FeignClient(value = "index12306-order${unique-name:}-service", url = "${aggregation.remote-url:}",
+        fallbackFactory = TicketOrderRemoteServiceFallbackFactory.class)
 public interface TicketOrderRemoteService {
 
     /**
@@ -80,4 +81,15 @@ public interface TicketOrderRemoteService {
      */
     @PostMapping("/api/order-service/order/ticket/cancel")
     Result<Void> cancelTicketOrder(@RequestBody CancelTicketOrderReqDTO requestParam);
+
+    /**
+     * 查询指定车次下已存在有效订单（未取消 / 未退票 / 未改签）的乘车人证件号集合
+     *
+     * @param trainId 车次 ID
+     * @param idCards 待校验的乘车人证件号集合
+     * @return 已存在有效订单的证件号集合
+     */
+    @GetMapping("/api/order-service/order/ticket/active/id-cards")
+    Result<List<String>> listActiveOrderIdCards(@RequestParam("trainId") String trainId,
+                                                @RequestParam("idCards") List<String> idCards);
 }

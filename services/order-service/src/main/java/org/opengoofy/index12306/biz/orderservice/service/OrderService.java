@@ -26,6 +26,7 @@ import org.opengoofy.index12306.biz.orderservice.dto.resp.TicketOrderDetailRespD
 import org.opengoofy.index12306.biz.orderservice.dto.resp.TicketOrderDetailSelfRespDTO;
 import org.opengoofy.index12306.biz.orderservice.mq.event.PayResultCallbackOrderEvent;
 import org.opengoofy.index12306.framework.starter.convention.page.PageResponse;
+import java.util.List;
 
 /**
  * 订单接口层
@@ -92,4 +93,15 @@ public interface OrderService {
      * @return 本人车票订单集合
      */
     PageResponse<TicketOrderDetailSelfRespDTO> pageSelfTicketOrder(TicketOrderSelfPageQueryReqDTO requestParam);
+
+    /**
+     * 查询指定车次下，给定证件号集合中仍处于「有效订单」的证件号
+     * <p>
+     * 有效订单：状态不属于「已取消 / 已退票 / 已改签」的订单明细，用于购票前的重复预订校验。
+     *
+     * @param trainId 车次 ID
+     * @param idCards 待校验的乘车人证件号集合
+     * @return 已存在有效订单的证件号集合（去重）
+     */
+    List<String> listActiveOrderIdCards(String trainId, List<String> idCards);
 }
