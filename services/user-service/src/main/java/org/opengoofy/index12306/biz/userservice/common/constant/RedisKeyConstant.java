@@ -34,6 +34,11 @@ public final class RedisKeyConstant {
     public static final String USER_DELETION = "index12306-user-service:user-deletion:";
 
     /**
+     * 用户注销次数缓存，Key Prefix + 证件类型_证件号
+     */
+    public static final String USER_DELETION_NUM = "index12306-user-service:user-deletion-num:";
+
+    /**
      * 用户注册可复用用户名分片，Key Prefix + Idx
      */
     public static final String USER_REGISTER_REUSE_SHARDING = "index12306-user-service:user-reuse:";

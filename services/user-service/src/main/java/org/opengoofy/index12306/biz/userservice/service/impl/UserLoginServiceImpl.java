@@ -64,6 +64,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.opengoofy.index12306.biz.userservice.common.constant.RedisKeyConstant.LOCK_USER_REGISTER;
 import static org.opengoofy.index12306.biz.userservice.common.constant.RedisKeyConstant.USER_DELETION;
+import static org.opengoofy.index12306.biz.userservice.common.constant.RedisKeyConstant.USER_DELETION_NUM;
 import static org.opengoofy.index12306.biz.userservice.common.constant.RedisKeyConstant.USER_REGISTER_REUSE_SHARDING;
 import static org.opengoofy.index12306.biz.userservice.common.enums.UserRegisterErrorCodeEnum.HAS_USERNAME_NOTNULL;
 import static org.opengoofy.index12306.biz.userservice.common.enums.UserRegisterErrorCodeEnum.MAIL_REGISTERED;
@@ -234,6 +235,8 @@ public class UserLoginServiceImpl implements UserLoginService {
                     .idCard(userQueryRespDTO.getIdCard())
                     .build();
             userDeletionMapper.insert(userDeletionDO);
+            // 注销成功后失效注销次数缓存，保证下次查询回源数据库刷新最新次数
+            distributedCache.delete(USER_DELETION_NUM + userQueryRespDTO.getIdType() + "_" + userQueryRespDTO.getIdCard());
             UserDO userDO = new UserDO();
             userDO.setDeletionTime(System.currentTimeMillis());
             userDO.setUsername(username);

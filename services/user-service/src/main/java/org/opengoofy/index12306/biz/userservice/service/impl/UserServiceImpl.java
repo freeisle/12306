@@ -32,12 +32,16 @@ import org.opengoofy.index12306.biz.userservice.dto.req.UserUpdateReqDTO;
 import org.opengoofy.index12306.biz.userservice.dto.resp.UserQueryActualRespDTO;
 import org.opengoofy.index12306.biz.userservice.dto.resp.UserQueryRespDTO;
 import org.opengoofy.index12306.biz.userservice.service.UserService;
+import org.opengoofy.index12306.framework.starter.cache.DistributedCache;
 import org.opengoofy.index12306.framework.starter.common.toolkit.BeanUtil;
 import org.opengoofy.index12306.framework.starter.convention.exception.ClientException;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+
+import static org.opengoofy.index12306.biz.userservice.common.constant.RedisKeyConstant.USER_DELETION_NUM;
 
 /**
  * 用户信息接口实现层
@@ -47,9 +51,15 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
+    /**
+     * 用户注销次数缓存过期时间（分钟）
+     */
+    private static final long USER_DELETION_NUM_CACHE_TIMEOUT = 30L;
+
     private final UserMapper userMapper;
     private final UserDeletionMapper userDeletionMapper;
     private final UserMailMapper userMailMapper;
+    private final DistributedCache distributedCache;
 
     @Override
     public UserQueryRespDTO queryUserByUserId(String userId) {
@@ -80,12 +90,20 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Integer queryUserDeletionNum(Integer idType, String idCard) {
-        LambdaQueryWrapper<UserDeletionDO> queryWrapper = Wrappers.lambdaQuery(UserDeletionDO.class)
-                .eq(UserDeletionDO::getIdType, idType)
-                .eq(UserDeletionDO::getIdCard, idCard);
-        // TODO 此处应该先查缓存
-        Long deletionCount = userDeletionMapper.selectCount(queryWrapper);
-        return Optional.ofNullable(deletionCount).map(Long::intValue).orElse(0);
+        String cacheKey = USER_DELETION_NUM + idType + "_" + idCard;
+        return distributedCache.safeGet(
+                cacheKey, // 缓存键
+                Integer.class, // 缓存值类型
+                () -> { // 缓存加载器
+                    LambdaQueryWrapper<UserDeletionDO> queryWrapper = Wrappers.lambdaQuery(UserDeletionDO.class)
+                            .eq(UserDeletionDO::getIdType, idType)
+                            .eq(UserDeletionDO::getIdCard, idCard);
+                    Long deletionCount = userDeletionMapper.selectCount(queryWrapper);
+                    return Optional.ofNullable(deletionCount).map(Long::intValue).orElse(0);
+                },
+                USER_DELETION_NUM_CACHE_TIMEOUT, // 缓存过期时间
+                TimeUnit.MINUTES // 缓存时间单位
+        );
     }
 
     @Override
