@@ -41,6 +41,16 @@ public final class SeatNumberUtil {
      */
     private static final Map<Integer, String> TRAIN_SECOND_CLASS_SEAT_NUMBER_MAP = new HashMap<>();
 
+    /**
+     * 动车-一等卧（铺位编号：A=左下铺, C=左上铺, D=右下铺, F=右上铺）
+     */
+    private static final Map<Integer, String> TRAIN_FIRST_SLEEPER_SEAT_NUMBER_MAP = new HashMap<>();
+
+    /**
+     * 动车-二等卧（铺位编号：A=左下铺, C=左上铺, D=右下铺, F=右上铺）
+     */
+    private static final Map<Integer, String> TRAIN_SECOND_SLEEPER_SEAT_NUMBER_MAP = new HashMap<>();
+
     static {
         TRAIN_BUSINESS_CLASS_SEAT_NUMBER_MAP.put(1, "A");
         TRAIN_BUSINESS_CLASS_SEAT_NUMBER_MAP.put(2, "C");
@@ -54,12 +64,21 @@ public final class SeatNumberUtil {
         TRAIN_SECOND_CLASS_SEAT_NUMBER_MAP.put(3, "C");
         TRAIN_SECOND_CLASS_SEAT_NUMBER_MAP.put(4, "D");
         TRAIN_SECOND_CLASS_SEAT_NUMBER_MAP.put(5, "F");
+        // 卧铺铺位：同一隔间内 A/C 为左侧（下/上），D/F 为右侧（下/上）
+        TRAIN_FIRST_SLEEPER_SEAT_NUMBER_MAP.put(1, "A");
+        TRAIN_FIRST_SLEEPER_SEAT_NUMBER_MAP.put(2, "C");
+        TRAIN_FIRST_SLEEPER_SEAT_NUMBER_MAP.put(3, "D");
+        TRAIN_FIRST_SLEEPER_SEAT_NUMBER_MAP.put(4, "F");
+        TRAIN_SECOND_SLEEPER_SEAT_NUMBER_MAP.put(1, "A");
+        TRAIN_SECOND_SLEEPER_SEAT_NUMBER_MAP.put(2, "C");
+        TRAIN_SECOND_SLEEPER_SEAT_NUMBER_MAP.put(3, "D");
+        TRAIN_SECOND_SLEEPER_SEAT_NUMBER_MAP.put(4, "F");
     }
 
     /**
      * 根据类型转换座位号
      *
-     * @param type 列车座位类型
+     * @param type 列车座位类型（0=商务座, 1=一等座, 2=二等座, 4=一等卧, 5=二等卧）
      * @param num  座位号
      * @return 座位编号
      */
@@ -69,6 +88,8 @@ public final class SeatNumberUtil {
             case 0 -> serialNumber = TRAIN_BUSINESS_CLASS_SEAT_NUMBER_MAP.get(num);
             case 1 -> serialNumber = TRAIN_FIRST_CLASS_SEAT_NUMBER_MAP.get(num);
             case 2 -> serialNumber = TRAIN_SECOND_CLASS_SEAT_NUMBER_MAP.get(num);
+            case 4 -> serialNumber = TRAIN_FIRST_SLEEPER_SEAT_NUMBER_MAP.get(num);
+            case 5 -> serialNumber = TRAIN_SECOND_SLEEPER_SEAT_NUMBER_MAP.get(num);
         }
         return serialNumber;
     }

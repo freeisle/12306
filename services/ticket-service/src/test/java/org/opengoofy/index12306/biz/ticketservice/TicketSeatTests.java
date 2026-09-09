@@ -262,7 +262,7 @@ class TicketSeatTests {
                         seatDO.setTrainId(carriageDO.getTrainId());
                         seatDO.setCarriageNumber(carriageDO.getCarriageNumber());
                         seatDO.setSeatNumber("0" + integer + num);
-                        seatDO.setSeatType(1);
+                        seatDO.setSeatType(4);
                         seatDO.setStartStation(each.getDeparture());
                         seatDO.setEndStation(each.getArrival());
                         seatDO.setSeatStatus(0);
@@ -301,7 +301,7 @@ class TicketSeatTests {
                         } else {
                             seatDO.setSeatNumber(integer + num);
                         }
-                        seatDO.setSeatType(1);
+                        seatDO.setSeatType(5);
                         seatDO.setStartStation(each.getDeparture());
                         seatDO.setEndStation(each.getArrival());
                         seatDO.setSeatStatus(0);
