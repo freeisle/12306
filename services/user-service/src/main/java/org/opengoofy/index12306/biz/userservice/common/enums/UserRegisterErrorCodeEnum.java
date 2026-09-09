@@ -59,7 +59,13 @@ public enum UserRegisterErrorCodeEnum implements IErrorCode {
 
     VERIFY_STATE_NOTNULL("A006014", "审核状态不能为空"),
 
-    REAL_NAME_NOTNULL("A006015", "真实姓名不能为空");
+    REAL_NAME_NOTNULL("A006015", "真实姓名不能为空"),
+
+    PHONE_FORMAT_ERROR("A006016", "手机号格式不正确"),
+
+    ID_CARD_FORMAT_ERROR("A006017", "证件号格式不正确"),
+
+    MAIL_FORMAT_ERROR("A006018", "邮箱格式不正确");
 
     /**
      * 错误码
