@@ -23,7 +23,7 @@
           <span class="important-text">{{ state.currTrain?.arrival }}</span>
           <span class="small-text">站</span>
           <span class="important-text"
-            >（{{ state.currTrain?.duration }}到）</span
+            >（{{ state.currTrain?.arrivalTime }}到）</span
           >
         </div>
         <Divider dashed></Divider>
@@ -235,7 +235,7 @@
           <span class="important-text">{{ state.currTrain?.arrival }}</span>
           <span class="small-text">站</span>
           <span class="important-text"
-            >（{{ state.currTrain?.duration }}到）</span
+            >（{{ state.currTrain?.arrivalTime }}到）</span
           >
         </div>
         <Table
@@ -257,8 +257,49 @@
             {{ ID_CARD_TYPE.find((item) => item.value === text)?.label }}
           </template>
         </Table>
+        <div v-if="state.isSleeper && state.isChooseSeat">
+          <a href=""
+            >*如果本次列车剩余铺位无法满足您的选铺需求，系统将自动为您分配铺位</a
+          >
+          <div class="seat-choose-wrapper">
+            <div>
+              <div class="tip">
+                <IconFont type="icon-laba001"></IconFont>
+                选铺咯
+              </div>
+              <div>
+                已选铺{{ state.sleeperChoose.filter((item) => item).length }}/{{
+                  state.dataSource.length
+                }}
+              </div>
+            </div>
+            <div>
+              <div
+                class="berth-row"
+                v-for="(item, index) in state.dataSource"
+                :key="item.id"
+              >
+                <span class="berth-label">乘车人{{ index + 1 }}：</span>
+                <div
+                  class="berth-img"
+                  :class="{ cur: state.sleeperChoose[index] === 'LOWER' }"
+                  @click="() => handleSelectBerth(index, 'LOWER')"
+                >
+                  下
+                </div>
+                <div
+                  class="berth-img"
+                  :class="{ cur: state.sleeperChoose[index] === 'UPPER' }"
+                  @click="() => handleSelectBerth(index, 'UPPER')"
+                >
+                  上
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
         <div
-          v-if="
+          v-else-if="
             state.isChooseSeat &&
             !(state.dataSource?.length > 5) &&
             state.dataSource?.length <= state.seatPosition.length
@@ -411,9 +452,14 @@ const state = reactive({
   isChooseSeat: true,
   seatLeft: 3,
   seatNumber: 5,
-  loading: false
+  loading: false,
+  isSleeper: false,
+  sleeperChoose: []
 })
 const currPassenger = ref([])
+
+// 卧铺席别编码：一等卧/二等卧/软卧/硬卧/高级软卧/动卧
+const SLEEPER_CODES = [4, 5, 6, 7, 9, 10]
 
 onMounted(() => {
   fetchTicketSearch({
@@ -515,6 +561,15 @@ watch(
         }
       })
     state.isChooseSeat = isChooseSeat
+    // 卧铺席别（一等卧/二等卧/软卧/硬卧/高级软卧/动卧）走选铺逻辑：只选上铺/下铺
+    state.isSleeper =
+      !!newValue?.length &&
+      newValue.every((item) => SLEEPER_CODES.includes(item.seatType))
+    const prevChoose = state.sleeperChoose ?? []
+    state.sleeperChoose = Array.from(
+      { length: newValue?.length ?? 0 },
+      (_, i) => prevChoose[i]
+    )
   },
   { deep: true }
 )
@@ -641,6 +696,12 @@ const handleSelectSeat = (code) => {
   }
 }
 
+// 卧铺选铺：每位乘车人独立选择上铺/下铺偏好，再次点击已选项则取消偏好
+const handleSelectBerth = (index, level) => {
+  state.sleeperChoose[index] =
+    state.sleeperChoose[index] === level ? undefined : level
+}
+
 const handleSubmitBuyTicket = () => {
   let params = { trainId: query?.trainId }
   const passengers = state.dataSource.map((item) => ({
@@ -650,7 +711,12 @@ const handleSubmitBuyTicket = () => {
   params = {
     ...params,
     passengers,
-    chooseSeats: toRaw(state.currentSeatCode),
+    // 卧铺：按乘车人顺序传铺位偏好（A=下铺, C=上铺, 空串=无偏好），与 passengers 下标一一对应
+    chooseSeats: state.isSleeper
+      ? state.sleeperChoose.map((item) =>
+          item === 'LOWER' ? 'A' : item === 'UPPER' ? 'C' : ''
+        )
+      : toRaw(state.currentSeatCode),
     departure: state.currTrain?.departure,
     arrival: state.currTrain?.arrival
   }
@@ -787,6 +853,34 @@ const handleSubmitBuyTicket = () => {
 
     padding: 20px;
     .seat-img {
+      display: inline-block;
+      text-align: center;
+      width: 30px;
+      height: 28px;
+      line-height: 25px;
+      background: url(https://kyfw.12306.cn/otn/resources/images/bg017.png)
+        no-repeat;
+      color: #fff;
+      margin: 0 5px;
+      cursor: pointer;
+      background-position: -80px 0;
+    }
+    .cur {
+      background-position: -40px 0;
+    }
+  }
+  .berth-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    &:last-child {
+      margin-bottom: 0;
+    }
+    .berth-label {
+      width: 80px;
+      color: #666;
+    }
+    .berth-img {
       display: inline-block;
       text-align: center;
       width: 30px;
