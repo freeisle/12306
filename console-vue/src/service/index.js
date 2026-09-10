@@ -188,6 +188,32 @@ const fetchRefundTicket = async (body) => {
   })
 }
 
+// ===== AI 智能客服（RAG）=====
+const fetchAiSupportAsk = async (body) => {
+  const { data } = await http({
+    method: 'POST',
+    url: '/api/ai-service/support/ask',
+    data: body
+  })
+  return data
+}
+
+const fetchAiSuggestedQuestions = async () => {
+  const { data } = await http({
+    method: 'GET',
+    url: '/api/ai-service/support/suggested-questions'
+  })
+  return data
+}
+
+const fetchAiSupportHealth = async () => {
+  const { data } = await http({
+    method: 'GET',
+    url: '/api/ai-service/support/health'
+  })
+  return data
+}
+
 export {
   fetchLogin,
   fetchRegister,
@@ -209,5 +235,8 @@ export {
   fetchOrderStatus,
   fetchUserUpdate,
   fetchMyTicket,
-  fetchRefundTicket
+  fetchRefundTicket,
+  fetchAiSupportAsk,
+  fetchAiSuggestedQuestions,
+  fetchAiSupportHealth
 }

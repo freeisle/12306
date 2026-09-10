@@ -22,6 +22,15 @@
             ><RouterLink to="/ticketSearch">车票查询</RouterLink></Item
           >
         </SubMenu>
+        <SubMenu key="sub5" @titleClick="titleClick">
+          <template #icon>
+            <CustomerServiceOutlined />
+          </template>
+          <template #title>智能助手</template>
+          <Item key="aiSupport"
+            ><RouterLink to="/aiSupport">智能客服</RouterLink></Item
+          >
+        </SubMenu>
         <SubMenu key="sub2" @titleClick="titleClick">
           <template #icon>
             <IconFont type="icon-pingtaixinxiguanli" />
@@ -75,6 +84,7 @@
 <script setup>
 import { defineProps, reactive } from 'vue'
 import IconFont from '@/components/icon-font'
+import { CustomerServiceOutlined } from '@ant-design/icons-vue'
 import { Layout, Menu, Divider, message, Tooltip } from 'ant-design-vue'
 import { fetchLogout } from '@/service'
 import { RouterLink } from 'vue-router'

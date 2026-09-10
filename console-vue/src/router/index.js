@@ -13,6 +13,7 @@ import AliPay from '../views/ali-pay'
 import TikectList from '../views/order-list'
 import PersonalTicket from '../views/personalTicket'
 import PaySuccess from '../views/pay-success'
+import AiSupport from '../views/ai-support'
 import Cookies from 'js-cookie'
 const routes = [
   {
@@ -38,6 +39,14 @@ const routes = [
     name: 'ticketSearch',
     component: TicketSearch,
     icon: 'icon-chaxun',
+    meta: { requiresAuth: false }
+  },
+  {
+    label: '智能客服',
+    path: '/aiSupport',
+    name: 'aiSupport',
+    component: AiSupport,
+    icon: 'icon-pingtaixinxiguanli',
     meta: { requiresAuth: false }
   },
   {
