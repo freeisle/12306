@@ -43,3 +43,8 @@ spring:
                   - /api/order-service/order/ticket/query
                   - /api/order-service/order/ticket/page
                   - /api/order-service/order/ticket/self/page
+
+        - id: index12306-ai-service
+          uri: lb://index12306-ai${unique-name:}-service/api/ai-service/**
+          predicates:
+            - Path=/api/ai-service/**

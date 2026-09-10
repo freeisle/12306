@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.opengoofy.index12306</groupId>
+        <artifactId>index12306-services</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>index12306-ai-service</artifactId>
+
+    <properties>
+        <!-- LangChain4j：Java 原生的 LLM 应用框架，提供 EmbeddingModel / EmbeddingStore / ChatLanguageModel 等 RAG 抽象 -->
+        <langchain4j.version>0.35.0</langchain4j.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- 项目框架：全局返回对象 Result / Results、统一异常、错误码 -->
+        <dependency>
+            <groupId>org.opengoofy.index12306</groupId>
+            <artifactId>index12306-convention-spring-boot-starter</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.opengoofy.index12306</groupId>
+            <artifactId>index12306-web-spring-boot-starter</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- LangChain4j 核心：EmbeddingModel、EmbeddingStore(InMemory)、TextSegment、Embedding 检索 -->
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j</artifactId>
+            <version>${langchain4j.version}</version>
+        </dependency>
+
+        <!-- LangChain4j OpenAI 兼容客户端：可对接通义千问(compatible-mode)/DeepSeek/OpenAI 等 -->
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-open-ai</artifactId>
+            <version>${langchain4j.version}</version>
+        </dependency>
+
+        <!--
+          可选：本地离线 Embedding 模型(ONNX，无需联网/无需 API Key)。
+          需要更真实的向量语义时取消注释，并把 ai.rag 的 embedding provider 切换为 all-minilm。
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-embeddings-all-minilm-l6-v2</artifactId>
+            <version>${langchain4j.version}</version>
+        </dependency>
+        -->
+
+        <!-- 注册中心：接入网关 lb:// 路由时启用（骨架默认 spring.cloud.nacos.discovery.enabled=false 单机运行） -->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+        </dependency>
+
+        <!-- Sentinel：对「LLM 调用/检索」做限流、熔断降级，AI 不可用时优雅退回兜底话术 -->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-sentinel</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>${project.artifactId}</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>

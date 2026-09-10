@@ -1,0 +1,52 @@
+server:
+  port: 9006
+
+spring:
+  application:
+    name: index12306-ai${unique-name:}-service
+  cloud:
+    nacos:
+      discovery:
+        enabled: true
+        server-addr: 192.168.101.68:8848
+        namespace: 5d564687-22f7-482b-941e-20b8ab3dbe9f
+        ip: 192.168.101.1
+        username: nacos
+        password: nacos
+    sentinel:
+      eager: false
+      transport:
+        dashboard: 192.168.101.68:8686
+        port: 8719
+
+# ===== AI / RAG 配置 =====
+ai:
+  rag:
+    llm-enabled: true
+    dimension: 512
+    top-k: 4
+    # 检索相似度下限（真实向量模型余弦分布建议 0.35~0.5），低于视为“知识库未覆盖”走兜底话术
+    min-score: 0.4
+    max-context-chars: 3000
+    embedding:
+      provider: ${AI_EMBEDDING_PROVIDER:alibaba}
+      model: ${AI_EMBEDDING_MODEL:text-embedding-v4}
+    llm:
+      api-key: ${AI_LLM_API_KEY:}
+      base-url: ${AI_LLM_BASE_URL:https://dashscope.aliyuncs.com/compatible-mode/v1}
+      model-name: ${AI_LLM_MODEL:qwen3-max}
+      temperature: 0.2
+      timeout-seconds: 30
+    cache:
+      enabled: true
+      max-size: 512
+      similarity-threshold: 0.92
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  metrics:
+    tags:
+      application: ${spring.application.name}

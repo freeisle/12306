@@ -12,6 +12,7 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>ai-service</module>
         <module>aggregation-service</module>
         <module>gateway-service</module>
         <module>order-service</module>
