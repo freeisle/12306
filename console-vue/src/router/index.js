@@ -14,6 +14,7 @@ import TikectList from '../views/order-list'
 import PersonalTicket from '../views/personalTicket'
 import PaySuccess from '../views/pay-success'
 import AiSupport from '../views/ai-support'
+import AiAgent from '../views/ai-agent'
 import Cookies from 'js-cookie'
 const routes = [
   {
@@ -48,6 +49,14 @@ const routes = [
     component: AiSupport,
     icon: 'icon-pingtaixinxiguanli',
     meta: { requiresAuth: false }
+  },
+  {
+    label: 'AI导购',
+    path: '/aiAgent',
+    name: 'aiAgent',
+    component: AiAgent,
+    icon: 'icon-goumai',
+    meta: { requiresAuth: true }
   },
   {
     label: '用户信息',

@@ -1,5 +1,5 @@
 server:
-  port: 9004
+  port: 10004
 
 spring:
   application:
@@ -10,12 +10,13 @@ spring:
   cloud:
     nacos:
       discovery:
-        server-addr: 127.0.0.1:8848
+        server-addr: 192.168.101.68:8848
+        namespace: 5d564687-22f7-482b-941e-20b8ab3dbe9f
       password: nacos
       username: nacos
     sentinel:
       transport:
-        dashboard: 127.0.0.1:8686
+        dashboard: 192.168.101.68:8686
         port: 8719
       datasource:
         flow-rules:
@@ -38,11 +39,11 @@ spring:
             password: nacos
   data:
     redis:
-      host: 127.0.0.1
+      host: 192.168.101.68
       port: 6379
       password: 123456
 rocketmq:
-  name-server: 127.0.0.1:9876
+  name-server: 192.168.101.68:9876
   producer:
     group: index12306_pay-service_common-message-execute_pg
     send-message-timeout: 2000

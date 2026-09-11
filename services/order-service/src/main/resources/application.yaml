@@ -1,5 +1,5 @@
 server:
-  port: 9003
+  port: 10003
 
 spring:
   application:
@@ -10,12 +10,13 @@ spring:
   cloud:
     nacos:
       discovery:
-        server-addr: 127.0.0.1:8848
+        server-addr: 192.168.101.68:8848
+        namespace: 5d564687-22f7-482b-941e-20b8ab3dbe9f
       password: nacos
       username: nacos
     sentinel:
       transport:
-        dashboard: 127.0.0.1:8686
+        dashboard: 192.168.101.68:8686
         port: 8719
       datasource:
         flow-rules:
@@ -36,7 +37,6 @@ spring:
             rule-type: degrade
             username: nacos
             password: nacos
-        # 二次开发：系统保护规则（兜底）。按机器维度（入口总QPS/平均RT/并发线程数/CPU）自适应拒绝，防雪崩
         system-rules:
           nacos:
             server-addr: ${spring.cloud.nacos.discovery.server-addr}
@@ -48,7 +48,7 @@ spring:
             password: nacos
   data:
     redis:
-      host: 127.0.0.1
+      host: 192.168.101.68
       port: 6379
       password: 123456
 mybatis-plus:
@@ -68,14 +68,12 @@ framework:
     redis:
       value-timeout: 16
       value-time-unit: days
-
-# 二次开发：开启 Feign 的 Sentinel 集成，Feign 方法成为 Sentinel 资源（接口名#方法(参数)），可配熔断降级规则
 feign:
   sentinel:
     enabled: true
 
 rocketmq:
-  name-server: 127.0.0.1:9876
+  name-server: 192.168.101.68:9876
   producer:
     group: index12306_order${unique-name:}-service_common-message-execute_pg
     send-message-timeout: 2000

@@ -35,7 +35,10 @@ initAxios.interceptors.response.use(
   },
   (error) => {
     console.log(error, 'error')
-    if (error.response.status === 401) {
+    // /api/ai-agent/* 的 401 是 Agent 侧 12306 登录失败等业务错误，
+    // 由页面自行提示，不能触发控制台的全局跳登录。
+    const isAgentApi = (error.config && error.config.url || '').indexOf('/api/ai-agent') === 0
+    if (error.response.status === 401 && !isAgentApi) {
       message.error('用户未登录或已过期！')
       window.location.href = 'login'
     }

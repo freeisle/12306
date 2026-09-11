@@ -23,12 +23,12 @@ mvn -pl services/ai-service -am spring-boot:run
 
 或在 IDE 里直接运行 `AiServiceApplication`。启动后：
 
-- 前端界面：http://localhost:9006/
-- 健康检查：http://localhost:9006/api/ai-service/support/health
-- 问答接口：`POST http://localhost:9006/api/ai-service/support/ask`
+- 前端界面：http://localhost:10006/
+- 健康检查：http://localhost:10006/api/ai-service/support/health
+- 问答接口：`POST http://localhost:10006/api/ai-service/support/ask`
 
 ```bash
-curl -X POST http://localhost:9006/api/ai-service/support/ask \
+curl -X POST http://localhost:10006/api/ai-service/support/ask \
   -H "Content-Type: application/json" \
   -d '{"question":"开车前多久退票不收手续费？"}'
 ```

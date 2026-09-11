@@ -46,7 +46,7 @@
             <version>${project.version}</version>
         </dependency>
 
-        <!-- 二次开发：Sentinel 规则 Nacos 持久化数据源。显式声明，不依赖本地仓库旧版 biz jar 的传递解析 -->
+        <!-- Sentinel 规则 Nacos 持久化数据源。显式声明，不依赖本地仓库旧版 biz jar 的传递解析 -->
         <dependency>
             <groupId>com.alibaba.csp</groupId>
             <artifactId>sentinel-datasource-nacos</artifactId>

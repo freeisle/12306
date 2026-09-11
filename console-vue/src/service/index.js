@@ -214,6 +214,43 @@ const fetchAiSupportHealth = async () => {
   return data
 }
 
+// ===== 阶段二 · 对话式购票 Agent（ai-agent-py，端口 10007）=====
+// 注意：Agent 为 FastAPI 裸 JSON 响应（非 Result 信封），返回值即业务对象。
+const fetchAgentSession = async (body) => {
+  const { data } = await http({
+    method: 'POST',
+    url: '/api/ai-agent/session',
+    data: body
+  })
+  return data
+}
+
+const fetchAgentChat = async (body) => {
+  const { data } = await http({
+    method: 'POST',
+    url: '/api/ai-agent/chat',
+    data: body
+  })
+  return data
+}
+
+const fetchAgentResume = async (body) => {
+  const { data } = await http({
+    method: 'POST',
+    url: '/api/ai-agent/resume',
+    data: body
+  })
+  return data
+}
+
+const fetchAgentHealth = async () => {
+  const { data } = await http({
+    method: 'GET',
+    url: '/api/ai-agent/health'
+  })
+  return data
+}
+
 export {
   fetchLogin,
   fetchRegister,
@@ -238,5 +275,9 @@ export {
   fetchRefundTicket,
   fetchAiSupportAsk,
   fetchAiSuggestedQuestions,
-  fetchAiSupportHealth
+  fetchAiSupportHealth,
+  fetchAgentSession,
+  fetchAgentChat,
+  fetchAgentResume,
+  fetchAgentHealth
 }

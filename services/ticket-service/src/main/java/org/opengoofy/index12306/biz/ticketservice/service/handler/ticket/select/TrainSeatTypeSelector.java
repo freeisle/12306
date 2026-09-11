@@ -65,6 +65,14 @@ public final class TrainSeatTypeSelector {
     private final ThreadPoolExecutor selectSeatThreadPoolExecutor;
 
     public List<TrainPurchaseTicketRespDTO> select(Integer trainType, PurchaseTicketReqDTO requestParam) {
+        // 防御：部分客户端（如 AI 导购）可能传入 [""] 这类空白选座，下游按 substring(1)/charAt(0) 解析会抛
+        // StringIndexOutOfBoundsException。这里在唯一入口统一过滤 null/空白项，过滤后为空则走自动分配座位。
+        if (CollUtil.isNotEmpty(requestParam.getChooseSeats())) {
+            List<String> validChooseSeats = requestParam.getChooseSeats().stream()
+                    .filter(seat -> seat != null && !seat.trim().isEmpty())
+                    .collect(Collectors.toList());
+            requestParam.setChooseSeats(validChooseSeats);
+        }
         List<PurchaseTicketPassengerDetailDTO> passengerDetails = requestParam.getPassengers();
         Map<Integer, List<PurchaseTicketPassengerDetailDTO>> seatTypeMap = passengerDetails.stream()
                 .collect(Collectors.groupingBy(PurchaseTicketPassengerDetailDTO::getSeatType));

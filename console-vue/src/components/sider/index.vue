@@ -30,6 +30,9 @@
           <Item key="aiSupport"
             ><RouterLink to="/aiSupport">智能客服</RouterLink></Item
           >
+          <Item key="aiAgent"
+            ><RouterLink to="/aiAgent">AI导购</RouterLink></Item
+          >
         </SubMenu>
         <SubMenu key="sub2" @titleClick="titleClick">
           <template #icon>
