@@ -27,7 +27,6 @@ import java.util.UUID;
  * 策略：按 Markdown 标题（{@code #}）划分小节，一个小节即一个语义片段，并保留标题作为元数据；
  * 小节过长时再按空行分段、必要时按字符窗口二次切分，避免单个片段过大稀释向量语义、超出上下文预算。
  * <p>
- * 生产可替换为 LangChain4j 的 {@code DocumentSplitters.recursive(...)} 或按 token 数切分。
  */
 public final class MarkdownSplitter {
 

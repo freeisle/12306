@@ -29,6 +29,8 @@ import dev.langchain4j.store.embedding.EmbeddingSearchResult;
 import dev.langchain4j.store.embedding.EmbeddingStore;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.opengoofy.index12306.biz.aiservice.common.enums.AnswerModeEnum;
+import org.opengoofy.index12306.biz.aiservice.common.enums.ConfidenceLevelEnum;
 import org.opengoofy.index12306.biz.aiservice.config.RagProperties;
 import org.opengoofy.index12306.biz.aiservice.core.HashingEmbeddingModel;
 import org.opengoofy.index12306.biz.aiservice.core.KnowledgeBaseLoader;
@@ -146,7 +148,7 @@ public class RagCustomerSupportServiceImpl implements RagCustomerSupportService 
         // 置信度分级：真实向量模型与离线哈希的分数分布不同，分档阈值随活跃模型切换
         double high = hashingMode() ? 0.60d : 0.85d;
         double medium = hashingMode() ? 0.35d : 0.75d;
-        String confidence = topScore >= high ? "HIGH" : topScore >= medium ? "MEDIUM" : "LOW";
+        ConfidenceLevelEnum confidence = ConfidenceLevelEnum.of(topScore, high, medium);
         ChatLanguageModel chatModel = chatModelProvider.getIfAvailable();
 
         if (props.isLlmEnabled() && chatModel != null) {
@@ -155,17 +157,17 @@ public class RagCustomerSupportServiceImpl implements RagCustomerSupportService 
                     .setAnswer(answer)
                     .setConfidence(confidence)
                     .setHitCache(false)
-                    .setMode("LLM")
+                    .setMode(AnswerModeEnum.LLM)
                     .setReferences(references);
         }
 
         // 离线抽取式：未启用 LLM 时，直接把最相关的规则原文作为答案，保证可演示、可核对
-        String answer = "根据 12306 相关规定（置信度 " + confidence + "）：\n\n" + context.toString().trim();
+        String answer = "根据 12306 相关规定（置信度 " + confidence.name() + "）：\n\n" + context.toString().trim();
         return new AiSupportAskRespDTO()
                 .setAnswer(answer)
                 .setConfidence(confidence)
                 .setHitCache(false)
-                .setMode("EXTRACTIVE")
+                .setMode(AnswerModeEnum.EXTRACTIVE)
                 .setReferences(references);
     }
 
@@ -190,9 +192,9 @@ public class RagCustomerSupportServiceImpl implements RagCustomerSupportService 
         return new AiSupportAskRespDTO()
                 .setAnswer("抱歉，我在现有 12306 规则知识库中没有检索到与该问题直接相关的内容。"
                         + "为避免提供不准确的信息，建议您拨打 12306 官方客服电话，或在 12306 App 内咨询在线客服。")
-                .setConfidence("LOW")
+                .setConfidence(ConfidenceLevelEnum.LOW)
                 .setHitCache(false)
-                .setMode("FALLBACK")
+                .setMode(AnswerModeEnum.FALLBACK)
                 .setReferences(Collections.emptyList());
     }
 
@@ -200,16 +202,16 @@ public class RagCustomerSupportServiceImpl implements RagCustomerSupportService 
      * Sentinel 降级：LLM 调用异常（超时/网络/额度）时触发，退回兜底话术，保证接口不 500。
      */
     public AiSupportAskRespDTO askFallback(AiSupportAskReqDTO requestParam, Throwable throwable) {
-        log.warn("[AI-RAG] 问答降级，question={}, cause={}", requestParam.getQuestion(), throwable.getMessage());
-        return fallbackAnswer().setMode("FALLBACK");
+        log.warn("问答降级，question={}, cause={}", requestParam.getQuestion(), throwable.getMessage());
+        return fallbackAnswer().setMode(AnswerModeEnum.FALLBACK);
     }
 
     /**
      * Sentinel 限流/熔断：请求被拦截时触发，同样退回兜底话术。
      */
     public AiSupportAskRespDTO askBlockHandler(AiSupportAskReqDTO requestParam, BlockException ex) {
-        log.warn("[AI-RAG] 问答被限流/熔断，question={}, rule={}", requestParam.getQuestion(), ex.getRule());
-        return fallbackAnswer().setMode("BLOCKED");
+        log.warn("问答被限流/熔断，question={}, rule={}", requestParam.getQuestion(), ex.getRule());
+        return fallbackAnswer().setMode(AnswerModeEnum.BLOCKED);
     }
 
     private String snippet(String content) {

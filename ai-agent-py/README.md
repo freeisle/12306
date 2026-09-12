@@ -1,16 +1,16 @@
-# ai-agent-py · 对话式购票 Agent（阶段二 · 场景一）+ 候补智能推荐（阶段三 · 场景三）
+# ai-agent-py · 对话式购票 Agent+ 候补智能推荐
 
-12306 二开的 AI 智能化：**对话式购票 Agent（场景一）** 与 **候补购票智能推荐（场景三）**。
+12306 AI 智能化：**对话式购票 Agent** 与 **候补购票智能推荐**。
 用 Python（LangGraph + LangChain + FastAPI）实现「查询 → 下单」全链路的对话式代理，
 加入 **Tool Calling** 与 **LangGraph 状态机**，并以 **interrupt 人工确认** 落实支付前 HITL、
 以 **幂等键台账 + 服务端用户锁** 落实下单幂等。
 
-场景三在场景一基础上扩展：当用户想要的车次/席别无票时，Agent 给出**「候补 vs 改乘」的智能决策推荐**——
+当用户想要的车次/席别无票时，Agent 给出**「候补 vs 改乘」的智能决策推荐**——
 用**确定性启发式打分算法**（`app/planning/waitlist_scorer.py`，纯函数、不经 LLM）估算候补成功率百分比，
 并对有票的替代车次按用户模糊偏好（不想半夜到、优先高铁、价格敏感等）排序。
 **本场景严格区分 LLM 与算法边界**：规划/估算是确定性问题交给算法，LLM 只做「理解人话偏好」与「说人话推荐」。
 
-与阶段一 `services/ai-service`（Java/LangChain4j RAG 客服）互补：
+与`services/ai-service`（Java/LangChain4j RAG 客服）互补：
 ai-service 负责「答问题」，本模块负责「办事情」（真实调用 12306 微服务完成购票动作）。
 
 ## 一、架构
@@ -89,17 +89,6 @@ python -m app.cli --username admin --password <密码>
 {"pending": {"type": "confirm_pay",   "payload": {"order": {"order_sn": "1798...", "total_yuan": 550.0}}}}
 ```
 
-curl 示例：
-
-```bash
-curl -s -X POST localhost:10007/agent/session -H 'Content-Type: application/json' \
-     -d '{"username":"admin","password":"xxx"}'
-curl -s -X POST localhost:10007/agent/chat -H 'Content-Type: application/json' \
-     -d '{"thread_id":"<tid>","message":"帮我买明天北京到上海的二等座"}'
-curl -s -X POST localhost:10007/agent/resume -H 'Content-Type: application/json' \
-     -d '{"thread_id":"<tid>","approved":true}'
-```
-
 ## 四、工具清单（Tool Calling）
 
 | 工具 | 后端接口 | 说明 |
@@ -126,7 +115,7 @@ curl -s -X POST localhost:10007/agent/resume -H 'Content-Type: application/json'
 4. **可恢复性**：interrupt 依赖 checkpointer（默认 `MemorySaver`，进程内）；
    生产可换 `SqliteSaver/PostgresSaver` 以跨重启恢复挂起会话。
 
-## 六、场景三：候补购票智能推荐（LLM/算法边界）
+## 六、候补购票智能推荐（LLM/算法边界）
 
 **这是本场景最重要的架构判断：该用算法的绝不用 LLM。** 候补成功率是可被规则刻画的确定性估算，
 交给纯函数算法 `app/planning/waitlist_scorer.py`；LLM 只负责把用户模糊偏好翻译成打分入参、
@@ -169,7 +158,5 @@ python -m pytest tests -q
 ## 八、边界与后续
 
 - 支付仅创建支付单；沙箱实际付款与回调不在代理职责内（无 mock 回调接口）。
-- 场景三本期只做**候补策略推荐**（启发式估算，不落地真实候补交易）；真实候补下单队列、
-  余票快照采集 + 时序/梯度提升预测模型、中转/行程规划图搜索均留待后续。
 - 改签/退票、流式输出(SSE)、向量记忆（跨会话偏好）留待后续场景。
 - 会话与台账当前为进程内存储，多实例部署前需外置（Redis/PG）。

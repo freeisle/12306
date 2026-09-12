@@ -37,7 +37,7 @@ import java.time.Duration;
  * <p>
  * 三个核心 Bean 都可平滑替换为生产实现：
  * <ul>
- *     <li>{@link EmbeddingModel}：默认真实云端模型（DashScope text-embedding-v3）→ 缺 Key 自动降级离线哈希 → 亦可换 AllMiniLmL6V2（本地 ONNX）</li>
+ *     <li>{@link EmbeddingModel}：默认真实云端模型（DashScope text-embedding-v4）→ 缺 Key 自动降级离线哈希 → 亦可换 AllMiniLmL6V2（本地 ONNX）</li>
  *     <li>{@link EmbeddingStore}：默认内存 → 可换 Redis Stack / Milvus / pgvector</li>
  *     <li>{@link ChatLanguageModel}：仅在 {@code ai.rag.llm-enabled=true} 时创建，未配置也能启动</li>
  * </ul>
@@ -50,13 +50,13 @@ public class RagConfiguration {
      * 真实云端向量模型（OpenAI 兼容协议，与 LLM 共用 API Key）。
      * <p>
      * 仅当 {@code ai.rag.embedding.provider=openai}（默认）<b>且</b> Key 非空时装配；
-     * DashScope compatible-mode 推荐 text-embedding-v3 / v4，维度跟随 {@code ai.rag.dimension}。
+     * DashScope compatible-mode 推荐 text-embedding-v4，维度跟随 {@code ai.rag.dimension}。
      */
     @Bean
     @ConditionalOnExpression("'${ai.rag.embedding.provider:openai}' == 'openai' and !'${ai.rag.llm.api-key:}'.isEmpty()")
     public EmbeddingModel openAiEmbeddingModel(RagProperties props) {
         RagProperties.Llm llm = props.getLlm();
-        log.info("[AI-RAG] EmbeddingModel=真实云端模型, provider=openai, model={}, dimensions={}",
+        log.info("调用真实云端模型, provider=openai, model={}, dimensions={}",
                 props.getEmbedding().getModel(), props.getDimension());
         return OpenAiEmbeddingModel.builder()
                 .apiKey(llm.getApiKey())
@@ -77,15 +77,15 @@ public class RagConfiguration {
     @Bean
     @ConditionalOnExpression("'${ai.rag.embedding.provider:openai}' != 'openai' or '${ai.rag.llm.api-key:}'.isEmpty()")
     public EmbeddingModel hashingEmbeddingModel(RagProperties props) {
-        log.warn("[AI-RAG] 未启用真实向量模型（provider={}, 有Key={}），降级为离线哈希向量",
+        log.warn("未启用真实向量模型（provider={}, 有Key={}），降级为离线哈希向量",
                 props.getEmbedding().getProvider(), !props.getLlm().getApiKey().isEmpty());
         return new HashingEmbeddingModel(props.getDimension());
     }
 
     /**
-     * 向量存储。骨架用内存实现，重启即失效，仅用于演示。
+     * 向量存储。
      * <p>
-     * 生产替换示例（复用项目已有的 Redis）：Redis Stack 的 RediSearch 向量索引；数据量大时用 Milvus。
+     * Redis Stack 的 RediSearch 向量索引；数据量大时用 Milvus。
      */
     @Bean
     public EmbeddingStore<TextSegment> embeddingStore() {

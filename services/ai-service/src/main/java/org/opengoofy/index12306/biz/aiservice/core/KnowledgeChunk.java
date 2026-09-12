@@ -24,6 +24,8 @@ package org.opengoofy.index12306.biz.aiservice.core;
  * @param source  来源文档名，如“退票规则.md”
  * @param title   所属小节标题，如“退票手续费标准”
  * @param content 片段正文
+ *
+ * @return 知识库片段
  */
 public record KnowledgeChunk(String id, String source, String title, String content) {
 }

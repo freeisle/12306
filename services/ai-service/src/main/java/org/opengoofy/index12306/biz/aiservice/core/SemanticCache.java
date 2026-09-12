@@ -19,6 +19,7 @@ package org.opengoofy.index12306.biz.aiservice.core;
 
 import dev.langchain4j.data.embedding.Embedding;
 import lombok.RequiredArgsConstructor;
+import org.opengoofy.index12306.biz.aiservice.common.enums.AnswerModeEnum;
 import org.opengoofy.index12306.biz.aiservice.config.RagProperties;
 import org.opengoofy.index12306.biz.aiservice.dto.resp.AiSupportAskRespDTO;
 import org.springframework.stereotype.Component;
@@ -27,13 +28,12 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * 语义缓存（Semantic Cache）——Cache-Aside 思想在 RAG 场景的延伸。
+ * 语义缓存（Semantic Cache。
  * <p>
  * 与普通缓存“精确 key 命中”不同，语义缓存以问题向量的余弦相似度判定命中：
  * “退票要手续费吗”和“退票收不收钱”虽然字面不同，但向量相近即可复用答案，
  * 从而在高频客服场景显著降低 LLM 调用次数（省钱）与响应延迟。
  * <p>
- * 骨架用进程内 LRU 实现；生产可下沉到 Redis（存向量 + 用向量检索判命中），与项目已有缓存设施复用。
  */
 @Component
 @RequiredArgsConstructor
@@ -52,9 +52,10 @@ public class SemanticCache {
     };
 
     /**
-     * 命中返回缓存答案（副本），未命中返回 null
+     * 命中返回缓存答案，未命中返回 null
      */
     public synchronized AiSupportAskRespDTO get(Embedding query) {
+        // 如果未启用语义缓存，则直接返回 null
         if (!props.getCache().isEnabled()) {
             return null;
         }
@@ -80,12 +81,15 @@ public class SemanticCache {
         return null;
     }
 
+    /*
+    * 存储缓存项
+    * */
     public synchronized void put(Embedding query, AiSupportAskRespDTO resp) {
         if (!props.getCache().isEnabled() || resp == null) {
             return;
         }
         // 兜底/被限流的答案不缓存，避免污染
-        if ("FALLBACK".equals(resp.getMode()) || "BLOCKED".equals(resp.getMode())) {
+        if (AnswerModeEnum.FALLBACK.equals(resp.getMode()) || AnswerModeEnum.BLOCKED.equals(resp.getMode())) {
             return;
         }
         store.put(java.util.UUID.randomUUID().toString(), new Entry(query, resp));

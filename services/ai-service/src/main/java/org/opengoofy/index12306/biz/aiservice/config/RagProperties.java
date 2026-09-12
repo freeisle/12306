@@ -23,9 +23,6 @@ import org.springframework.stereotype.Component;
 
 /**
  * RAG 智能客服可配置项
- * <p>
- * 对应 application.yaml 中的 {@code ai.rag.*}。骨架默认 {@code llm-enabled=false}，
- * 即“离线抽取式”模式：只用向量检索返回最相关的规则原文，不依赖任何外部大模型即可运行演示。
  */
 @Data
 @Component
@@ -58,7 +55,7 @@ public class RagProperties {
     private int maxContextChars = 3000;
 
     /**
-     * 大模型配置（llm-enabled=true 时生效）
+     * 大模型配置
      */
     private Llm llm = new Llm();
 
@@ -80,21 +77,21 @@ public class RagProperties {
          */
         private String provider = "openai";
         /**
-         * 模型名，DashScope compatible-mode 推荐 text-embedding-v3（或 v4）
+         * 模型名
          */
-        private String model = "text-embedding-v3";
+        private String model = "text-embedding-v4";
     }
 
     @Data
     public static class Llm {
         /**
-         * API Key（建议用环境变量注入，切勿硬编码到仓库）
+         * API Key
          */
         private String apiKey = "";
         /**
          * OpenAI 兼容接口地址，默认为通义千问 compatible-mode
          */
-        private String baseUrl = "https://dashscope.aliyuncs.com/compatible-mode/v1";
+        private String baseUrl = "https://ws-uj1iqoj68v25u4jx.cn-beijing.maas.aliyuncs.com/compatible-mode/v1";
         /**
          * 模型名
          */

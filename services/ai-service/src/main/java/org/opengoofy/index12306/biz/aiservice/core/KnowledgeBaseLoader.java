@@ -43,7 +43,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * 启动时扫描 {@code classpath*:/knowledge/*.md}，切分成片段并向量化后写入 {@link EmbeddingStore}，
  * 同时维护 “向量库存储 ID -> 业务片段元数据” 的索引，使检索命中后能还原来源与标题（用于引用溯源）。
  * <p>
- * 说明：这里刻意不依赖 LangChain4j 的 Metadata API，而是用 store 返回的 id 做映射，跨版本更稳定。
  */
 @Slf4j
 @Component
@@ -78,7 +77,7 @@ public class KnowledgeBaseLoader {
                 for (KnowledgeChunk chunk : batch) {
                     segments.add(TextSegment.from(embedText(chunk)));
                 }
-                // 批量向量化：云端 Embedding API（如 DashScope）单次请求有条数上限，不能整库一次发
+                // 批量向量化：云端 Embedding API单次请求有条数上限，不能整库一次发
                 List<Embedding> embeddings = embeddingModel.embedAll(segments).content();
                 for (int i = 0; i < batch.size(); i++) {
                     KnowledgeChunk chunk = batch.get(i);
@@ -88,9 +87,9 @@ public class KnowledgeBaseLoader {
                     chunks.add(indexed);
                 }
             }
-            log.info("[AI-RAG] 已加载知识文档：{}，切分 {} 个片段", filename, parsed.size());
+            log.info("已加载知识文档：{}，切分 {} 个片段", filename, parsed.size());
         }
-        log.info("[AI-RAG] 知识库加载完成，共 {} 个片段，来源 {} 个文档", chunks.size(), resources.length);
+        log.info("知识库加载完成，共 {} 个片段，来源 {} 个文档", chunks.size(), resources.length);
     }
 
     /**

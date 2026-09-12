@@ -1,4 +1,4 @@
-"""LangGraph 状态机：对话式购票（场景一）。
+"""LangGraph 状态机：对话式购票。
 
 拓扑：
     START → agent ⇄ tools ─(登记下单计划)→ confirm_order ─(interrupt 人工确认)─┐
@@ -88,7 +88,7 @@ def agent_node(state: TicketAgentState, config: RunnableConfig, model: Any = Non
     system = SystemMessage(content=SYSTEM_PROMPT.format(today=date.today().isoformat()))
     try:
         reply = model.bind_tools(TOOL_FUNCS).invoke([system, *state["messages"]])
-    except Exception as exc:  # 缺 Key / 网络异常时降级为可读提示，避免裸 500
+    except Exception as exc:
         reply = AIMessage(
             content=f"抱歉，模型调用失败：{type(exc).__name__}: {exc}。"
             f"请检查 AI_LLM_API_KEY 与网络后重试，您的对话上下文已保留。"

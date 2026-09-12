@@ -19,6 +19,8 @@ package org.opengoofy.index12306.biz.aiservice.dto.resp;
 
 import lombok.Data;
 import lombok.experimental.Accessors;
+import org.opengoofy.index12306.biz.aiservice.common.enums.AnswerModeEnum;
+import org.opengoofy.index12306.biz.aiservice.common.enums.ConfidenceLevelEnum;
 
 import java.util.List;
 
@@ -35,9 +37,9 @@ public class AiSupportAskRespDTO {
     private String answer;
 
     /**
-     * 置信度：HIGH / MEDIUM / LOW
+     * 置信度，取值与分档规则见 {@link ConfidenceLevelEnum}
      */
-    private String confidence;
+    private ConfidenceLevelEnum confidence;
 
     /**
      * 是否命中语义缓存
@@ -45,9 +47,9 @@ public class AiSupportAskRespDTO {
     private Boolean hitCache;
 
     /**
-     * 生成模式：LLM（大模型生成）/ EXTRACTIVE（离线抽取式）/ FALLBACK（兜底）/ BLOCKED（被限流熔断）
+     * 生成模式，取值与语义见 {@link AnswerModeEnum}
      */
-    private String mode;
+    private AnswerModeEnum mode;
 
     /**
      * 端到端耗时（毫秒）
