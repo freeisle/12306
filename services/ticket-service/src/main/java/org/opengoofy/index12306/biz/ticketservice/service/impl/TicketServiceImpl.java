@@ -271,7 +271,9 @@ public class TicketServiceImpl extends ServiceImpl<TicketMapper, TicketDO> imple
                             Map<String, String> seatMarginMap = seatMarginCacheLoader.load(String.valueOf(each.getTrainId()), seatType, item.getDeparture(), item.getArrival());
                             return Optional.ofNullable(seatMarginMap.get(String.valueOf(item.getSeatType()))).map(Integer::parseInt).orElse(0);
                         });
-                seatClassList.add(new SeatClassDTO(item.getSeatType(), quantity, new BigDecimal(item.getPrice()).divide(new BigDecimal("100"), 1, RoundingMode.HALF_UP), false));
+                // 候补资格：真实 12306 中候补正是在某席别售罄时开放。此前恒为 false，
+                // 使上层（AI 候补推荐）无法感知哪些席别可候补，这里改为 quantity<=0 即开放候补。
+                seatClassList.add(new SeatClassDTO(item.getSeatType(), quantity, new BigDecimal(item.getPrice()).divide(new BigDecimal("100"), 1, RoundingMode.HALF_UP), quantity <= 0));
             });
             each.setSeatClassList(seatClassList);
         }
@@ -332,11 +334,13 @@ public class TicketServiceImpl extends ServiceImpl<TicketMapper, TicketDO> imple
             List<SeatClassDTO> seatClassList = new ArrayList<>();
             for (int i = 0; i < trainStationPriceDOSub.size(); i++) {
                 TrainStationPriceDO trainStationPriceDO = trainStationPriceDOSub.get(i);
+                int quantity = Integer.parseInt(remainingTicket.get(i).toString());
                 SeatClassDTO seatClassDTO = SeatClassDTO.builder()
                         .type(trainStationPriceDO.getSeatType())
-                        .quantity(Integer.parseInt(remainingTicket.get(i).toString()))
+                        .quantity(quantity)
                         .price(new BigDecimal(trainStationPriceDO.getPrice()).divide(new BigDecimal("100"), 1, RoundingMode.HALF_UP))
-                        .candidate(false)
+                        // 候补资格：席别售罄(quantity<=0)即开放候补，与 V1 保持一致，供 AI 候补推荐感知。
+                        .candidate(quantity <= 0)
                         .build();
                 seatClassList.add(seatClassDTO);
             }
